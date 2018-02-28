@@ -48,10 +48,17 @@ public class ConfigurationManager {
       .put("fr", FRENCH_TAGGER)
       .put("de", GERMAN_HGC_TAGGER)
       .build();
+  private static final int DEFAULT_NO_LIMIT_STRENGTH = 2;
+  private static final int DEFAULT_SINGLE_STRENGTH_MIN_OCCUR = 3;
+  private static final String DEFAULT_LANGUAGE = "en";
 
   private final int defaultNoLimitStrength;
   private final int defaultSingleStrengthMinOccur;
   private final String defaultLanguage;
+
+  public ConfigurationManager() {
+    this(DEFAULT_NO_LIMIT_STRENGTH, DEFAULT_SINGLE_STRENGTH_MIN_OCCUR, DEFAULT_LANGUAGE);
+  }
 
   public ConfigurationManager(int defaultNoLimitStrength,
                               int defaultSingleStrengthMinOccur,

@@ -14,7 +14,7 @@ Add the following dependency to your pom
 
 ```xml
 <dependency>
-  <groupId>com.hubspot.jtopia</groupId>
+  <groupId>com.hubspot</groupId>
   <artifactId>jtopia</artifactId>
   <version>1.0-SNAPSHOT</version>
 </dependency>
@@ -54,15 +54,14 @@ If the extracted term is constructed of at least as many separate words as defin
 You can define a constant  `TermsExtractor` per language by generating a `Configuration` per language from `ConfigurationManager` and using the `Configuration` object to create a `TermsExtractor`.
 
 ```java
-@com.google.inject.Inject
-ConfigurationManager configurationManager;
+ConfigurationManager configurationManager = new ConfigurationManager();
 
 Configuration engConfigurationOne = configurationManager.getConfigurationFrom("en");
 //You may choose to get a fine tuned configuration
 Configuration engConfigurationTwo = configurationManager.getConfigurationFrom("en", // language
-                                                                        3, // noLimitStrength
-                                                                        2, // singleStrengthMinOccur,
-                                                                        ConfigurationManager.ENGLISH_WSJ_LEFT3WORDS_NODISTSIM_TAGGER // Different tagger);
+                                                                              2, // noLimitStrength
+                                                                              3, // singleStrengthMinOccur,
+                                                                              ConfigurationManager.ENGLISH_WSJ_LEFT3WORDS_NODISTSIM_TAGGER); // Different tagger
 TermsExtractor termsExtractor = new TermsExtractor(engConfigurationOne);
 
 String text = "Keywords will be extracted from this text";
