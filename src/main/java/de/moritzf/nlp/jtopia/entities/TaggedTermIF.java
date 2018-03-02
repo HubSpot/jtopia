@@ -1,7 +1,4 @@
-package com.hubspot.jtopia.entities;
-
-import java.util.List;
-import java.util.Map;
+package de.moritzf.nlp.jtopia.entities;
 
 import org.immutables.value.Value;
 import org.immutables.value.Value.Style.ImplementationVisibility;
@@ -18,13 +15,19 @@ import com.fasterxml.jackson.databind.annotation.JsonSerialize;
     optionalAcceptNullable = true,
     visibility = ImplementationVisibility.SAME,
     jdkOnly = true)
-@JsonSerialize(as = TermDocument.class)
-@JsonDeserialize(as = TermDocument.class)
-public interface TermDocumentIF {
+@JsonSerialize(as = TaggedTerm.class)
+@JsonDeserialize(as = TaggedTerm.class)
+public interface TaggedTermIF {
 
-  List<String> getTerms();
-  String getNormalizedText();
-  List<TaggedTerm> getTaggedTerms();
-  Map<String, Integer> getExtractedTerms();
-  Map<String, List<Integer>> getFinalFilteredTerms();
+  String getTerm();
+  String getTag();
+  String getNorm();
+
+  static TaggedTerm of(String term, String tag, String norm) {
+    return TaggedTerm.builder()
+        .setTerm(term)
+        .setTag(tag)
+        .setNorm(norm)
+        .build();
+  }
 }

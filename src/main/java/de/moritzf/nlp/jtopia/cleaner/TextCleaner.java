@@ -1,4 +1,4 @@
-package com.hubspot.jtopia.cleaners;
+package de.moritzf.nlp.jtopia.cleaner;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -49,7 +49,6 @@ public class TextCleaner {
     }
 
     return tokenizedWords;
-
   }
 
   private String replaceAll(String text, String regex, String replacement) {

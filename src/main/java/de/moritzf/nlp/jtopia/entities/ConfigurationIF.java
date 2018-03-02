@@ -1,4 +1,4 @@
-package com.hubspot.jtopia.entities;
+package de.moritzf.nlp.jtopia.entities;
 
 import java.util.Set;
 

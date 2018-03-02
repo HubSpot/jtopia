@@ -1,4 +1,4 @@
-package com.hubspot.jtopia.helpers;
+package de.moritzf.nlp.jtopia.helpers;
 
 import java.util.List;
 import java.util.Optional;
@@ -7,8 +7,9 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import com.google.common.collect.ImmutableList;
-import com.hubspot.jtopia.entities.TaggedTerm;
-import com.hubspot.jtopia.entities.TaggedTermIF;
+
+import de.moritzf.nlp.jtopia.entities.TaggedTerm;
+import de.moritzf.nlp.jtopia.entities.TaggedTermIF;
 
 public final class TaggerUtils {
 

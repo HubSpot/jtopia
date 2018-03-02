@@ -1,4 +1,4 @@
-package com.hubspot.jtopia.helpers;
+package de.moritzf.nlp.jtopia.helpers;
 
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;

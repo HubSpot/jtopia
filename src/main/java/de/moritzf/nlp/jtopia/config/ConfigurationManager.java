@@ -1,4 +1,4 @@
-package com.hubspot.jtopia.config;
+package de.moritzf.nlp.jtopia.config;
 
 import java.io.BufferedReader;
 import java.io.IOException;
@@ -14,7 +14,8 @@ import org.slf4j.LoggerFactory;
 
 import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.ImmutableSet;
-import com.hubspot.jtopia.entities.Configuration;
+
+import de.moritzf.nlp.jtopia.entities.Configuration;
 
 public class ConfigurationManager {
 

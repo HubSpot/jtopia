@@ -1,4 +1,4 @@
-package com.hubspot.jtopia;
+package de.moritzf.nlp.jtopia;
 
 
 import java.util.ArrayList;
@@ -14,13 +14,13 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import com.google.common.collect.ImmutableSet;
-import com.hubspot.jtopia.cleaners.TextCleaner;
-import com.hubspot.jtopia.entities.ConfigurationIF;
-import com.hubspot.jtopia.entities.TaggedTerm;
-import com.hubspot.jtopia.entities.TaggedTermIF;
-import com.hubspot.jtopia.entities.TermDocument;
-import com.hubspot.jtopia.filters.TermsFilter;
-import com.hubspot.jtopia.helpers.TaggerUtils;
+import de.moritzf.nlp.jtopia.cleaner.TextCleaner;
+import de.moritzf.nlp.jtopia.entities.ConfigurationIF;
+import de.moritzf.nlp.jtopia.entities.TaggedTerm;
+import de.moritzf.nlp.jtopia.entities.TaggedTermIF;
+import de.moritzf.nlp.jtopia.entities.TermDocument;
+import de.moritzf.nlp.jtopia.filter.TermsFilter;
+import de.moritzf.nlp.jtopia.helpers.TaggerUtils;
 
 import edu.stanford.nlp.tagger.maxent.MaxentTagger;
 

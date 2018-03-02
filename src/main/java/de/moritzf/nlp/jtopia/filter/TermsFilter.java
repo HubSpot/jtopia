@@ -1,4 +1,4 @@
-package com.hubspot.jtopia.filters;
+package de.moritzf.nlp.jtopia.filter;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -12,7 +12,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import com.google.common.collect.ImmutableSet;
-import com.hubspot.jtopia.helpers.PunctuationRemover;
+import de.moritzf.nlp.jtopia.helpers.PunctuationRemover;
 
 public class TermsFilter {
 
