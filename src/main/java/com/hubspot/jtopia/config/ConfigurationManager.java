@@ -18,6 +18,13 @@ import com.hubspot.jtopia.entities.Configuration;
 
 public class ConfigurationManager {
 
+  // Languages
+  public static final String ENGLISH = "en";
+  public static final String SPANISH = "es";
+  public static final String FRENCH = "fr";
+  public static final String GERMAN = "de";
+
+
   // English
   public static final String ENGLISH_WSJ_BIDIRECTIONAL_DISTSIM_TAGGER = "wsj-0-18-bidirectional-distsim.tagger";
   public static final String ENGLISH_BIDIRECTIONAL_DISTSIM_TAGGER = "english-bidirectional-distsim.tagger";
@@ -43,14 +50,14 @@ public class ConfigurationManager {
   public static final Set<String> SUPPORTED_LANGS = ImmutableSet.of("en", "es", "de", "fr");
   private static final Logger LOG = LoggerFactory.getLogger(ConfigurationManager.class);
   private static final Map<String, String> LANG_TO_TAGGER_MAP = ImmutableMap.<String, String>builder()
-      .put("en", ENGLISH_WSJ_BIDIRECTIONAL_DISTSIM_TAGGER)
-      .put("es", SPANISH_UD_TAGGER)
-      .put("fr", FRENCH_TAGGER)
-      .put("de", GERMAN_HGC_TAGGER)
+      .put(ENGLISH, ENGLISH_WSJ_BIDIRECTIONAL_DISTSIM_TAGGER)
+      .put(SPANISH, SPANISH_UD_TAGGER)
+      .put(FRENCH, FRENCH_TAGGER)
+      .put(GERMAN, GERMAN_HGC_TAGGER)
       .build();
   private static final int DEFAULT_NO_LIMIT_STRENGTH = 2;
   private static final int DEFAULT_SINGLE_STRENGTH_MIN_OCCUR = 3;
-  private static final String DEFAULT_LANGUAGE = "en";
+  private static final String DEFAULT_LANGUAGE = ENGLISH;
 
   private final int defaultNoLimitStrength;
   private final int defaultSingleStrengthMinOccur;
@@ -75,8 +82,7 @@ public class ConfigurationManager {
 
   public Configuration getConfigurationFrom(String language) {
 
-    return getConfigurationFrom(language,
-                                getModelFileLocation(language));
+    return getConfigurationFrom(language, getModelFileLocation(language));
   }
 
   public Configuration getConfigurationFrom(String language, String taggerFileLocation) {
@@ -85,6 +91,11 @@ public class ConfigurationManager {
                                 defaultNoLimitStrength,
                                 defaultSingleStrengthMinOccur,
                                 taggerFileLocation);
+  }
+
+  public Configuration getConfigurationFrom(String language, int noLimitStrength, int singleStrengthMinOccur) {
+
+    return getConfigurationFrom(language, noLimitStrength, singleStrengthMinOccur, getModelFileLocation(language));
   }
 
   public Configuration getConfigurationFrom(String language, int noLimitStrength, int singleStrengthMinOccur, String taggerFileLocation) {
