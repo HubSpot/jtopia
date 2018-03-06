@@ -1,94 +1,131 @@
 package de.moritzf.nlp.jtopia;
 
-import de.moritzf.nlp.jtopia.cleaner.TextCleaner;
-import de.moritzf.nlp.jtopia.tagger.Tagger;
-import de.moritzf.nlp.jtopia.tagger.LexiconTagger;
-import de.moritzf.nlp.jtopia.tagger.OpenNLPTagger;
-import de.moritzf.nlp.jtopia.tagger.StanfordTagger;
-import de.moritzf.nlp.jtopia.extractor.TermExtractor;
-import de.moritzf.nlp.jtopia.filter.TermsFilter;
-import org.apache.logging.log4j.LogManager;
-import org.apache.logging.log4j.Logger;
 
-/**
- * The type Terms extractor.
- *
- * @author sree
- */
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.Optional;
+import java.util.Set;
+import java.util.function.Consumer;
+
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
+import com.google.common.collect.ImmutableSet;
+import de.moritzf.nlp.jtopia.cleaner.TextCleaner;
+import de.moritzf.nlp.jtopia.entities.ConfigurationIF;
+import de.moritzf.nlp.jtopia.entities.TaggedTerm;
+import de.moritzf.nlp.jtopia.entities.TaggedTermIF;
+import de.moritzf.nlp.jtopia.entities.TermDocument;
+import de.moritzf.nlp.jtopia.filter.TermsFilter;
+import de.moritzf.nlp.jtopia.helpers.TaggerUtils;
+
+import edu.stanford.nlp.tagger.maxent.MaxentTagger;
+
 public class TermsExtractor {
 
-	private static final Logger logger = LogManager.getLogger(TermsExtractor.class);
+  private static final Logger LOG = LoggerFactory.getLogger(TermsExtractor.class);
+  private final MaxentTagger tagger;
+  private final TermsFilter termsFilter;
+  private final TextCleaner textCleaner;
 
-    /**
-     * Instantiates a new Terms extractor.
-     */
-    public TermsExtractor(){
+  public TermsExtractor(ConfigurationIF configuration) {
 
-		if( Configuration.getModelFileLocation() != null && !Configuration.getModelFileLocation().isEmpty() ){
+    this.tagger = new MaxentTagger(configuration.getModelFileLocation());
+    this.termsFilter = new TermsFilter(configuration.getSingleStrengthMinOccur(),
+                                       configuration.getNoLimitStrength(),
+                                       configuration.getStopWords());
+    this.textCleaner = new TextCleaner();
+  }
 
-			if(Configuration.taggerType.equalsIgnoreCase("default")) {
-				logger.info("Using English Lexicon POS tagger..");
-				tagger = new LexiconTagger(Configuration.getModelFileLocation());
+  public Set<TaggedTerm> generateTaggedTerms(Collection<String> terms) {
 
-			}else if(Configuration.taggerType.equalsIgnoreCase("openNLP")) {
-				logger.info("Using openNLP POS tagger..");
-				tagger = new OpenNLPTagger(Configuration.getModelFileLocation());
+    ImmutableSet.Builder<TaggedTerm> builder = ImmutableSet.builder();
+    for (String term : terms) {
 
-			}else if(Configuration.taggerType.equalsIgnoreCase("stanford")) {
-				logger.info("Using Stanford POS tagger..");
-				tagger = new StanfordTagger();
-			}
-		}
+      String tag = tagger.tagString(term);
+      // Since Stanford POS has tagged terms like establish_VB , we only need the POS tag
+      // Some POS tags in Stanford has special charaters at end like their/PRP$
+      if (tag.split("_").length > 1) {
+        builder.add(TaggerUtils.standardizeTaggedTerm(TaggedTermIF.of(term, tag.split("_")[1].replaceAll("\\$", ""), term)));
+      }
+    }
 
-		
-	}
+    return builder.build();
+  }
 
-	private static Tagger tagger = null;
+  public Optional<TermDocument> extractTerms(String text) {
 
-    /**
-     * Extract terms term document.
-     *
-     * @param text the text
-     * @return the term document
-     */
-    public TermDocument extractTerms(String text) {
-		return performTermExtraction(text);
-	}
-	
-	private TermDocument performTermExtraction(String text) {
-		if(text != null && !text.isEmpty()) {
-			logger.debug("Input String and lexicon is not null / empty");
-			TermDocument termDocument = new TermDocument();
-			TextCleaner textCleaner = new TextCleaner();
-			
-			termDocument.setNormalizedText(textCleaner.normalizeText(text));
-			termDocument.setTerms(textCleaner.tokenizeText(termDocument.getNormalizedText()));
+    if (text == null) {
+      return Optional.empty();
+    }
+    LOG.debug("Extracting terms for text {}", text);
+    String normalizedText = textCleaner.normalizeText(text);
+    List<String> tokens = textCleaner.tokenizeText(normalizedText);
+    Set<TaggedTerm> taggedTerms = generateTaggedTerms(tokens);
+    Map<String, Integer> extractedTerms = extractTerms(taggedTerms);
 
-			if(Configuration.taggerType.equalsIgnoreCase("default")) {
-				LexiconTagger lexiconTagger = (LexiconTagger) tagger;
-				termDocument.setTagsByTerm(lexiconTagger.getTags());
-				termDocument = lexiconTagger.tag(termDocument);
+    return Optional.of(TermDocument.builder().setNormalizedText(normalizedText)
+                           .setTerms(tokens)
+                           .setTaggedTerms(taggedTerms)
+                           .setExtractedTerms(extractedTerms)
+                           .setFinalFilteredTerms(termsFilter.filterTerms(extractedTerms))
+                           .build());
+  }
 
-			}else if(Configuration.taggerType.equalsIgnoreCase("openNLP")) {
-				OpenNLPTagger openNLPTagger = (OpenNLPTagger) tagger;
-				termDocument = openNLPTagger.tag(termDocument);
+  private Map<String, Integer> extractTerms(Collection<TaggedTerm> taggedTerms) {
 
-			}else if(Configuration.taggerType.equalsIgnoreCase("stanford")) {
-				StanfordTagger stanfordTagger = (StanfordTagger) tagger;
-				termDocument = stanfordTagger.tag(termDocument);
-			}
-			
-			TermExtractor termExtractor = new TermExtractor();
-			termDocument.setExtractedTerms(termExtractor.extractTerms(termDocument.getTaggedContainer()));
-			
-			TermsFilter termsFilter = new TermsFilter(Configuration.getSingleStrength(),Configuration.getNoLimitStrength());
-			termDocument.setFinalFilteredTerms(termsFilter.filterTerms(termDocument.getExtractedTerms()));
-			
-			return termDocument;
-		}else {
-			logger.debug("Input text / lexicon is null or empty..exiting..");
-			return null;
-		}
-	}
-	
+    Map<String, Integer> terms = new HashMap<>();
+    List<String> multiTerm = new ArrayList<>();
+    Consumer<String> addTerms = (term) -> {
+      multiTerm.add(term);
+      if (terms.containsKey(term)) {
+        terms.put(term, terms.get(term) + 1);
+      } else {
+        terms.put(term, 1);
+      }
+    };
+    int search = 0;
+    int noun = 1;
+    int state = search;
+    for (TaggedTerm taggedTerm : taggedTerms) {
+
+      String term = taggedTerm.getTerm();
+      String tag = taggedTerm.getTag();
+      if (state == search && tag.startsWith("N")) {
+        state = noun;
+        addTerms.accept(term);
+      } else if ((state == search) && (tag.equals("JJ")) && (Character.isUpperCase(term.charAt(0)))) {
+        state = noun;
+        addTerms.accept(term);
+      } else if (state == noun && tag.startsWith("N")) {
+        addTerms.accept(term);
+      } else if (state == noun && !tag.startsWith("N")) {
+        state = search;
+        if (multiTerm.size() > 1) {
+          String multiWord = null;
+          for (String multi : multiTerm) {
+            if (multiWord == null) {
+              multiWord = multi;
+            } else {
+              multiWord = String.format("%s %s", multiWord, multi);
+            }
+          }
+          if (terms.containsKey(multiWord)) {
+            Integer count = terms.get(multiWord);
+            count += 1;
+            terms.put(multiWord, count);
+          } else {
+            terms.put(multiWord, 1);
+          }
+        }
+        multiTerm.clear();
+      }
+    }
+
+    return terms;
+  }
 }
+
