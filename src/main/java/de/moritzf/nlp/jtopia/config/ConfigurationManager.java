@@ -83,29 +83,29 @@ public class ConfigurationManager {
 
   public Configuration getConfigurationFrom(String language) {
 
-    return getConfigurationFrom(language, getModelFileLocation(language));
+    return getConfigurationFrom(language, getDefaultTaggerFile(language));
   }
 
-  public Configuration getConfigurationFrom(String language, String taggerFileLocation) {
+  public Configuration getConfigurationFrom(String language, String taggerFile) {
 
     return getConfigurationFrom(language,
                                 defaultNoLimitStrength,
                                 defaultSingleStrengthMinOccur,
-                                taggerFileLocation);
+                                taggerFile);
   }
 
   public Configuration getConfigurationFrom(String language, int noLimitStrength, int singleStrengthMinOccur) {
 
-    return getConfigurationFrom(language, noLimitStrength, singleStrengthMinOccur, getModelFileLocation(language));
+    return getConfigurationFrom(language, noLimitStrength, singleStrengthMinOccur, getDefaultTaggerFile(language));
   }
 
-  public Configuration getConfigurationFrom(String language, int noLimitStrength, int singleStrengthMinOccur, String taggerFileLocation) {
+  public Configuration getConfigurationFrom(String language, int noLimitStrength, int singleStrengthMinOccur, String taggerFile) {
 
     return Configuration.builder()
         .setNoLimitStrength(noLimitStrength)
         .setSingleStrengthMinOccur(singleStrengthMinOccur)
         .setStopWords(getStopWords(language))
-        .setModelFileLocation(taggerFileLocation)
+        .setModelFileLocation(getModelLocation(language, taggerFile))
         .build();
   }
 
@@ -122,13 +122,17 @@ public class ConfigurationManager {
     }
   }
 
-  private String getModelFileLocation(String language) {
+  private String getDefaultTaggerFile(String language) {
 
     String langForConsideration = language;
     if (!LANG_TO_TAGGER_MAP.containsKey(language)) {
       langForConsideration = defaultLanguage;
     }
-    String modelFileName = String.format("/models/%s", LANG_TO_TAGGER_MAP.get(langForConsideration));
+    return LANG_TO_TAGGER_MAP.get(langForConsideration);
+  }
+
+  private String getModelLocation(String language, String taggerFilename) {
+    String modelFileName = String.format("/models/%s", taggerFilename);
     try {
       return FileSystems.getDefault().getPath(this.getClass().getResource(modelFileName).toString()).toString();
     } catch (Exception e) {
