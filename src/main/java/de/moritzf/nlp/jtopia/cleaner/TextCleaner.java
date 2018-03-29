@@ -12,9 +12,9 @@ public class TextCleaner {
 
   private static final Logger LOG = LoggerFactory.getLogger(TextCleaner.class);
   private static final String UMLAUT = "äåüöÄÅÖÜßæÆøØáéíóúÁÉÍÑÓÚéÉèÈàÀùÙâêîôûÂÊÎÔÛçÇãÃáÁàÀâÂéÉêÊíÍõÕóÓôÔúÚüÜ";
-
   private static final String MATCH_PATTERN = "([^a-zA-Z" + UMLAUT + "]*)([a-z" + UMLAUT + "A-Z-\\.]*[a-zA-Z"
       + UMLAUT + "])([^a-zA-Z" + UMLAUT + "]*[a-zA-Z" + UMLAUT + "]*)";
+  private static final Pattern TOKENIZE_PATTERN = Pattern.compile(MATCH_PATTERN, Pattern.DOTALL | Pattern.MULTILINE);
 
   public String normalizeText(String text) {
     LOG.debug("Input to normalize text: {}", text);
@@ -27,7 +27,6 @@ public class TextCleaner {
 
     List<String> tokenizedWords = new ArrayList<>();
     String[] words = text.split("\\s");
-    Pattern pattern = Pattern.compile(MATCH_PATTERN, Pattern.DOTALL | Pattern.MULTILINE);
 
     for (String word : words) {
       // If the term is empty, skip it, since we probably just have multiple whitespace characters.
@@ -35,7 +34,7 @@ public class TextCleaner {
         continue;
       }
       // Now, a word can be preceded or succeeded by symbols, so let's split those out
-      Matcher matcher = pattern.matcher(word);
+      Matcher matcher = TOKENIZE_PATTERN.matcher(word);
       if (!matcher.find()) {
         tokenizedWords.add(word);
         continue;
