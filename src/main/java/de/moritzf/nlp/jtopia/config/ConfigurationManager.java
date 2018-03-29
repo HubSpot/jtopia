@@ -78,28 +78,28 @@ public class ConfigurationManager {
 
   public Configuration getDefaultConfiguration() {
 
-    return getConfigurationFrom(defaultLanguage);
+    return getConfigurationFor(defaultLanguage);
   }
 
-  public Configuration getConfigurationFrom(String language) {
+  public Configuration getConfigurationFor(String language) {
 
-    return getConfigurationFrom(language, getDefaultTaggerFile(language));
+    return getConfigurationFor(language, getDefaultTaggerFile(language));
   }
 
-  public Configuration getConfigurationFrom(String language, String taggerFile) {
+  public Configuration getConfigurationFor(String language, String taggerFile) {
 
-    return getConfigurationFrom(language,
-                                defaultNoLimitStrength,
-                                defaultSingleStrengthMinOccur,
-                                taggerFile);
+    return getConfigurationFor(language,
+                               defaultNoLimitStrength,
+                               defaultSingleStrengthMinOccur,
+                               taggerFile);
   }
 
-  public Configuration getConfigurationFrom(String language, int noLimitStrength, int singleStrengthMinOccur) {
+  public Configuration getConfigurationFor(String language, int noLimitStrength, int singleStrengthMinOccur) {
 
-    return getConfigurationFrom(language, noLimitStrength, singleStrengthMinOccur, getDefaultTaggerFile(language));
+    return getConfigurationFor(language, noLimitStrength, singleStrengthMinOccur, getDefaultTaggerFile(language));
   }
 
-  public Configuration getConfigurationFrom(String language, int noLimitStrength, int singleStrengthMinOccur, String taggerFile) {
+  public Configuration getConfigurationFor(String language, int noLimitStrength, int singleStrengthMinOccur, String taggerFile) {
 
     return Configuration.builder()
         .setNoLimitStrength(noLimitStrength)
