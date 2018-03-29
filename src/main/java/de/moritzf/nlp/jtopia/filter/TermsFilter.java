@@ -42,10 +42,9 @@ public class TermsFilter {
     int strength = WORD_SPLITTER.splitToList(term).size();
     if (strength == 1 && occurrence >= singleWordMinOccurrence) {
       return isSingleWordTermValid(term);
-    } else if (strength >= multiWordMinStrength) {
-      return true;
+    } else {
+      return strength >= multiWordMinStrength;
     }
-    return false;
   }
 
   private boolean isSingleWordTermValid(String term) {
