@@ -14,14 +14,15 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import com.google.common.collect.ImmutableSet;
+import com.google.common.collect.Iterables;
+
 import de.moritzf.nlp.jtopia.cleaner.TextCleaner;
 import de.moritzf.nlp.jtopia.entities.ConfigurationIF;
 import de.moritzf.nlp.jtopia.entities.TaggedTerm;
 import de.moritzf.nlp.jtopia.entities.TaggedTermIF;
-import de.moritzf.nlp.jtopia.entities.TermDocument;
+import de.moritzf.nlp.jtopia.entities.TermResponse;
 import de.moritzf.nlp.jtopia.filter.TermsFilter;
 import de.moritzf.nlp.jtopia.helpers.TaggerUtils;
-
 import edu.stanford.nlp.tagger.maxent.MaxentTagger;
 
 public class TermsExtractor {
@@ -56,23 +57,40 @@ public class TermsExtractor {
     return builder.build();
   }
 
-  public Optional<TermDocument> extractTerms(String text) {
+  public Optional<TermResponse> extractTermsByWordBatchSize(String text, int batchSize) {
+    if (text == null) {
+      return Optional.empty();
+    }
+    LOG.debug("Extracting terms for text {} in batches of size {}", text, batchSize);
+    List<String> tokens = getTokensFromText(text);
+    Map<String, Integer> termOccurrenceMap = new HashMap<>();
+    Iterables.partition(tokens, batchSize)
+        .forEach(tokenBatch -> mergeMapsInPlace(termOccurrenceMap, generateTermsAndTheirOccurrenceMap(tokenBatch)));
+    return Optional.of(TermResponse.builder()
+                           .setTermsAndOccurrences(termOccurrenceMap)
+                           .build());
+  }
 
+  public Optional<TermResponse> extractTerms(String text) {
     if (text == null) {
       return Optional.empty();
     }
     LOG.debug("Extracting terms for text {}", text);
+    List<String> tokens = getTokensFromText(text);
+    return Optional.of(TermResponse.builder()
+                           .setTermsAndOccurrences(generateTermsAndTheirOccurrenceMap(tokens))
+                           .build());
+  }
+
+  private List<String> getTokensFromText(String text) {
     String normalizedText = textCleaner.normalizeText(text);
-    List<String> tokens = textCleaner.tokenizeText(normalizedText);
+    return textCleaner.tokenizeText(normalizedText);
+  }
+
+  private Map<String, Integer> generateTermsAndTheirOccurrenceMap(List<String> tokens) {
     Set<TaggedTerm> taggedTerms = generateTaggedTerms(tokens);
     Map<String, Integer> extractedTerms = extractTerms(taggedTerms);
-
-    return Optional.of(TermDocument.builder().setNormalizedText(normalizedText)
-                           .setTerms(tokens)
-                           .setTaggedTerms(taggedTerms)
-                           .setExtractedTerms(extractedTerms)
-                           .setFinalFilteredTerms(termsFilter.filterTerms(extractedTerms))
-                           .build());
+    return termsFilter.filterTerms(extractedTerms);
   }
 
   private Map<String, Integer> extractTerms(Collection<TaggedTerm> taggedTerms) {
@@ -126,6 +144,10 @@ public class TermsExtractor {
     }
 
     return terms;
+  }
+
+  private void mergeMapsInPlace(Map<String, Integer> map1, Map<String, Integer> map2) {
+    map2.forEach((k, v) -> map1.merge(k, v, (v1, v2) -> v1 + v2));
   }
 }
 

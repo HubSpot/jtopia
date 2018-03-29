@@ -17,7 +17,7 @@ import com.google.common.io.Resources;
 
 import de.moritzf.nlp.jtopia.config.ConfigurationManager;
 import de.moritzf.nlp.jtopia.entities.Configuration;
-import de.moritzf.nlp.jtopia.entities.TermDocument;
+import de.moritzf.nlp.jtopia.entities.TermResponse;
 
 public class TermsExtractorTest {
 
@@ -33,15 +33,32 @@ public class TermsExtractorTest {
     Configuration configuration = configurationManager.getConfigurationFor(ConfigurationManager.ENGLISH);
     TermsExtractor termsExtractor = new TermsExtractor(configuration);
     String englishText = Resources.toString(getClass().getResource("/english-text.txt"), StandardCharsets.UTF_8);
-    Set<String> expectedKeyphrases = new HashSet<>(Arrays.asList("Reminder Use", "Mirror Inc", "Soap Scum", "ClearShield Simple Spray-on", "Research Hardness",
-                                                                 "Baking Soda Liquid", "Others Mixture", "Care Instructions Company", "Oil Lemon Juice",
-                                                                 "Cause Damage", "Efforts Need", "Specific Recommendations", "Websites Offer", "Water Spots",
-                                                                 "Life Prevention Key", "Abrasive Agents", "Brushed-on Product", "Non-scratch Sponge", "Customers Central Texas",
-                                                                 "Standard Check Manufacturer", "Mineral Deposits", "Basic Level", "Arrow Glass", "Cleaning Time", "Stone/tile"));
+    Set<String> expectedKeyphrases = new HashSet<>(Arrays.asList("oil lemon juice", "abrasive agents", "websites offer", "non-scratch sponge", "ClearShield simple spray-on",
+                                                                 "specific recommendations", "standard check manufacturer", "care instructions company",
+                                                                 "soap scum", "Mirror Inc", "mineral deposits", "research hardness", "cleaning time", "stone /tile",
+                                                                 "brushed-on product", "basic level", "water spots", "baking soda liquid", "life prevention key",
+                                                                 "cause damage", "reminder use", "Arrow Glass", "efforts need", "customers Central Texas", "others mixture"));
 
-    Optional<TermDocument> termDocument = termsExtractor.extractTerms(englishText);
+    Optional<TermResponse> termDocument = termsExtractor.extractTerms(englishText);
     assertThat(termDocument).isPresent();
-    assertThat(termDocument.get().getFinalFilteredTerms().keySet()).containsExactlyElementsOf(expectedKeyphrases);
+    assertThat(termDocument.get().getTermsAndOccurrences().keySet()).containsOnlyElementsOf(expectedKeyphrases);
+  }
+
+  @Test
+  public void itExtractsEnglishPageInWordBatches() throws IOException {
+    Configuration configuration = configurationManager.getConfigurationFor(ConfigurationManager.ENGLISH);
+    TermsExtractor termsExtractor = new TermsExtractor(configuration);
+    String englishText = Resources.toString(getClass().getResource("/english-text.txt"), StandardCharsets.UTF_8);
+    Set<String> expectedKeyphrases = new HashSet<>(Arrays.asList("non-scratch sponge", "Mirror Inc", "stone /tile", "cleaning time", "water spots", "baking soda liquid",
+                                                                 "soap scum mineral deposits", "others mixture", "websites offer", "abrasive agents", "cleaning guidelines",
+                                                                 "care instructions company", "dish soap", "soap scum", "tips Let", "research hardness", "mineral deposits",
+                                                                 "Central Texas", "basic level", "brushed-on product", "ClearShield simple spray-on solution",
+                                                                 "ShowerGuard glass", "life prevention key", "damage surface", "cause damage", "door glass",
+                                                                 "cleaning product recommendations", "Arrow Glass", "door manufacturer", "lemon juice"));
+
+    Optional<TermResponse> termDocument = termsExtractor.extractTermsByWordBatchSize(englishText, 100);
+    assertThat(termDocument).isPresent();
+    assertThat(termDocument.get().getTermsAndOccurrences().keySet()).containsOnlyElementsOf(expectedKeyphrases);
   }
 
   @Test
@@ -49,30 +66,29 @@ public class TermsExtractorTest {
     Configuration configuration = configurationManager.getConfigurationFor(ConfigurationManager.ENGLISH, ConfigurationManager.ENGLISH_WSJ_LEFT3WORDS_NODISTSIM_TAGGER);
     TermsExtractor termsExtractor = new TermsExtractor(configuration);
     String englishText = Resources.toString(getClass().getResource("/english-text.txt"), StandardCharsets.UTF_8);
-    Set<String> expectedKeyphrases = new HashSet<>(Arrays.asList("Cause Damage", "Reminder Use", "Efforts Need", "Websites Offer", "Water Spots", "Life Prevention Key",
-                                                                 "Mirror Inc", "Brushed-on Product", "Soap Scum", "Customers Central Texas", "Research Hardness", "Standard Check Manufacturer",
-                                                                 "Mineral Deposits", "Arrow Glass", "Others Mixture", "Care Instructions Company", "Oil Lemon Juice",
-                                                                 "Soda Liquid", "Cleaning Time"));
+    Set<String> expectedKeyphrases = new HashSet<>(Arrays.asList("oil lemon juice", "websites offer", "standard check manufacturer", "care instructions company",
+                                                                 "soap scum", "Mirror Inc", "mineral deposits", "research hardness", "cleaning time", "brushed-on product",
+                                                                 "water spots", "soda liquid", "life prevention key", "cause damage", "reminder use", "Arrow Glass",
+                                                                 "efforts need", "customers Central Texas", "others mixture"));
 
-    Optional<TermDocument> termDocument = termsExtractor.extractTerms(englishText);
+    Optional<TermResponse> termDocument = termsExtractor.extractTerms(englishText);
     assertThat(termDocument).isPresent();
-    assertThat(termDocument.get().getFinalFilteredTerms().keySet()).containsExactlyElementsOf(expectedKeyphrases);
+    assertThat(termDocument.get().getTermsAndOccurrences().keySet()).containsOnlyElementsOf(expectedKeyphrases);
   }
 
   @Test
-  public void itExtractsEnglishPageWithOtherTaggerWithFineTunecConfiguration() throws IOException {
+  public void itExtractsEnglishPageWithOtherTaggerWithFineTuneConfiguration() throws IOException {
     Configuration configuration = configurationManager.getConfigurationFor(ConfigurationManager.ENGLISH,
                                                                            3,
                                                                            2,
                                                                            ConfigurationManager.ENGLISH_WSJ_LEFT3WORDS_NODISTSIM_TAGGER);
     TermsExtractor termsExtractor = new TermsExtractor(configuration);
     String englishText = Resources.toString(getClass().getResource("/english-text.txt"), StandardCharsets.UTF_8);
-    Set<String> expectedKeyphrases = new HashSet<>(Arrays.asList("Standard Check Manufacturer", "Life Prevention Key", "Care Instructions Company",
-                                                                 "Oil Lemon Juice", "Customers Central Texas"));
+    Set<String> expectedKeyphrases = new HashSet<>(Arrays.asList("oil lemon juice", "life prevention key", "standard check manufacturer", "care instructions company", "customers Central Texas"));
 
-    Optional<TermDocument> termDocument = termsExtractor.extractTerms(englishText);
+    Optional<TermResponse> termDocument = termsExtractor.extractTerms(englishText);
     assertThat(termDocument).isPresent();
-    assertThat(termDocument.get().getFinalFilteredTerms().keySet()).containsExactlyElementsOf(expectedKeyphrases);
+    assertThat(termDocument.get().getTermsAndOccurrences().keySet()).containsOnlyElementsOf(expectedKeyphrases);
   }
 
   @Test
@@ -81,10 +97,10 @@ public class TermsExtractorTest {
     Configuration configuration = configurationManager.getConfigurationFor(ConfigurationManager.SPANISH);
     TermsExtractor termsExtractor = new TermsExtractor(configuration);
     String spanishText = Resources.toString(getClass().getResource("/spanish-text.txt"), StandardCharsets.UTF_8);
-    Set<String> expectedKeyphrases = ImmutableSet.of("Colocarte Una Camisa", "Un Abrigo", "Tu Deporte", "Desempe Ño", "Accesorio Cabeza", "Mallas Tipo Nylon Polipropileno");
+    Set<String> expectedKeyphrases = ImmutableSet.of("accesorio cabeza", "colocarte una camisa", "mallas tipo nylon polipropileno", "un abrigo", "desempe ño", "tu deporte");
 
-    Optional<TermDocument> termDocument = termsExtractor.extractTerms(spanishText);
+    Optional<TermResponse> termDocument = termsExtractor.extractTerms(spanishText);
     assertThat(termDocument).isPresent();
-    assertThat(termDocument.get().getFinalFilteredTerms().keySet()).containsExactlyElementsOf(expectedKeyphrases);
+    assertThat(termDocument.get().getTermsAndOccurrences().keySet()).containsOnlyElementsOf(expectedKeyphrases);
   }
 }
