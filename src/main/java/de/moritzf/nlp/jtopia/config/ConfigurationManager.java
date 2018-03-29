@@ -12,6 +12,7 @@ import java.util.stream.Collectors;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import com.google.common.base.Preconditions;
 import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.ImmutableSet;
 
@@ -77,35 +78,35 @@ public class ConfigurationManager {
   }
 
   public Configuration getDefaultConfiguration() {
-
-    return getConfigurationFrom(defaultLanguage);
+    return getConfigurationFor(defaultLanguage);
   }
 
-  public Configuration getConfigurationFrom(String language) {
-
-    return getConfigurationFrom(language, getModelFileLocation(language));
+  public Configuration getConfigurationFor(String language) {
+    return getConfigurationFor(language, getDefaultTaggerFile(language));
   }
 
-  public Configuration getConfigurationFrom(String language, String taggerFileLocation) {
-
-    return getConfigurationFrom(language,
-                                defaultNoLimitStrength,
-                                defaultSingleStrengthMinOccur,
-                                taggerFileLocation);
+  public Configuration getConfigurationFor(String language, String taggerFile) {
+    return getConfigurationFor(language,
+                               defaultNoLimitStrength,
+                               defaultSingleStrengthMinOccur,
+                               taggerFile);
   }
 
-  public Configuration getConfigurationFrom(String language, int noLimitStrength, int singleStrengthMinOccur) {
-
-    return getConfigurationFrom(language, noLimitStrength, singleStrengthMinOccur, getModelFileLocation(language));
+  public Configuration getConfigurationFor(String language, int multiWordMinStrength, int singleWordMinOccurrence) {
+    return getConfigurationFor(language, multiWordMinStrength, singleWordMinOccurrence, getDefaultTaggerFile(language));
   }
 
-  public Configuration getConfigurationFrom(String language, int noLimitStrength, int singleStrengthMinOccur, String taggerFileLocation) {
+  public Configuration getConfigurationFor(String language, int multiWordMinStrength, int singleWordMinOccurrence, String taggerFile) {
+    Preconditions.checkArgument(SUPPORTED_LANGS.contains(language), "Language {} not supported", language);
+    Preconditions.checkArgument(!taggerFile.isEmpty(), "TaggerFile location should not be empty");
+    Preconditions.checkArgument(multiWordMinStrength > 0, "Multi-word minimum strength needs to be > 0");
+    Preconditions.checkArgument(singleWordMinOccurrence > 0, "Single word minimum occurrence count needs to be > 0");
 
     return Configuration.builder()
-        .setNoLimitStrength(noLimitStrength)
-        .setSingleStrengthMinOccur(singleStrengthMinOccur)
+        .setMultiWordMinStrength(multiWordMinStrength)
+        .setSingleWordMinOccurrence(singleWordMinOccurrence)
         .setStopWords(getStopWords(language))
-        .setModelFileLocation(taggerFileLocation)
+        .setModelFileLocation(getModelLocation(language, taggerFile))
         .build();
   }
 
@@ -122,13 +123,17 @@ public class ConfigurationManager {
     }
   }
 
-  private String getModelFileLocation(String language) {
+  private String getDefaultTaggerFile(String language) {
 
     String langForConsideration = language;
     if (!LANG_TO_TAGGER_MAP.containsKey(language)) {
       langForConsideration = defaultLanguage;
     }
-    String modelFileName = String.format("/models/%s", LANG_TO_TAGGER_MAP.get(langForConsideration));
+    return LANG_TO_TAGGER_MAP.get(langForConsideration);
+  }
+
+  private String getModelLocation(String language, String taggerFilename) {
+    String modelFileName = String.format("/models/%s", taggerFilename);
     try {
       return FileSystems.getDefault().getPath(this.getClass().getResource(modelFileName).toString()).toString();
     } catch (Exception e) {

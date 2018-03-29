@@ -34,8 +34,8 @@ public class TermsExtractor {
   public TermsExtractor(ConfigurationIF configuration) {
 
     this.tagger = new MaxentTagger(configuration.getModelFileLocation());
-    this.termsFilter = new TermsFilter(configuration.getSingleStrengthMinOccur(),
-                                       configuration.getNoLimitStrength(),
+    this.termsFilter = new TermsFilter(configuration.getSingleWordMinOccurrence(),
+                                       configuration.getMultiWordMinStrength(),
                                        configuration.getStopWords());
     this.textCleaner = new TextCleaner();
   }
