@@ -14,12 +14,12 @@ public class TermsFilter {
   private static final Splitter WORD_SPLITTER = Splitter.on(" ").omitEmptyStrings();
 
   private int singleWordMinOccurrence;
-  private int multiWordStrength;
+  private int multiWordMinStrength;
   private Set<String> stopWords;
 
-  public TermsFilter(int singleWordMinOccurrence, int noLimit, Set<String> stopWords) {
+  public TermsFilter(int singleWordMinOccurrence, int multiWordMinStrength, Set<String> stopWords) {
     this.singleWordMinOccurrence = singleWordMinOccurrence;
-    multiWordStrength = noLimit;
+    this.multiWordMinStrength = multiWordMinStrength;
     this.stopWords = stopWords;
   }
 
@@ -34,7 +34,7 @@ public class TermsFilter {
   /**
    * A term is Valid iff
    * - it is a single word and it occurred more often than defined by singleWordMinOccurrence
-   * - it constitutes of multiple words and the number of words is higher or equal to multiWordStrength
+   * - it constitutes of multiple words and the number of words is higher or equal to multiWordMinStrength
    */
   private boolean isValidTerm(Entry<String, Integer> termOccurrenceEntry) {
     String term = termOccurrenceEntry.getKey();
@@ -42,7 +42,7 @@ public class TermsFilter {
     int strength = WORD_SPLITTER.splitToList(term).size();
     if (strength == 1 && occurrence >= singleWordMinOccurrence) {
       return isSingleWordTermValid(term);
-    } else if (strength >= multiWordStrength) {
+    } else if (strength >= multiWordMinStrength) {
       return true;
     }
     return false;
