@@ -12,6 +12,7 @@ import java.util.stream.Collectors;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import com.google.common.base.Preconditions;
 import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.ImmutableSet;
 
@@ -77,33 +78,33 @@ public class ConfigurationManager {
   }
 
   public Configuration getDefaultConfiguration() {
-
     return getConfigurationFor(defaultLanguage);
   }
 
   public Configuration getConfigurationFor(String language) {
-
     return getConfigurationFor(language, getDefaultTaggerFile(language));
   }
 
   public Configuration getConfigurationFor(String language, String taggerFile) {
-
     return getConfigurationFor(language,
                                defaultNoLimitStrength,
                                defaultSingleStrengthMinOccur,
                                taggerFile);
   }
 
-  public Configuration getConfigurationFor(String language, int noLimitStrength, int singleStrengthMinOccur) {
-
-    return getConfigurationFor(language, noLimitStrength, singleStrengthMinOccur, getDefaultTaggerFile(language));
+  public Configuration getConfigurationFor(String language, int multiWordMinStrength, int singleWordMinOccurrence) {
+    return getConfigurationFor(language, multiWordMinStrength, singleWordMinOccurrence, getDefaultTaggerFile(language));
   }
 
-  public Configuration getConfigurationFor(String language, int noLimitStrength, int singleStrengthMinOccur, String taggerFile) {
+  public Configuration getConfigurationFor(String language, int multiWordMinStrength, int singleWordMinOccurrence, String taggerFile) {
+    Preconditions.checkArgument(SUPPORTED_LANGS.contains(language), "Language {} not supported", language);
+    Preconditions.checkArgument(!taggerFile.isEmpty(), "TaggerFile location should not be empty");
+    Preconditions.checkArgument(multiWordMinStrength > 0, "Multi-word minimum strength needs to be > 0");
+    Preconditions.checkArgument(singleWordMinOccurrence > 0, "Single word minimum occurrence count needs to be > 0");
 
     return Configuration.builder()
-        .setNoLimitStrength(noLimitStrength)
-        .setSingleStrengthMinOccur(singleStrengthMinOccur)
+        .setMultiWordMinStrength(multiWordMinStrength)
+        .setSingleWordMinOccurrence(singleWordMinOccurrence)
         .setStopWords(getStopWords(language))
         .setModelFileLocation(getModelLocation(language, taggerFile))
         .build();

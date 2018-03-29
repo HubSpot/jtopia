@@ -10,8 +10,8 @@ import com.hubspot.immutables.style.HubSpotStyle;
 @HubSpotStyle
 public interface ConfigurationIF {
 
-  int getSingleStrengthMinOccur();
-  int getNoLimitStrength();
+  int getSingleWordMinOccurrence();
+  int getMultiWordMinStrength();
   String getModelFileLocation();
   Set<String> getStopWords();
 }
