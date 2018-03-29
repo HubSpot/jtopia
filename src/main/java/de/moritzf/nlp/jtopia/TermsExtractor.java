@@ -13,6 +13,7 @@ import java.util.function.Consumer;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import com.google.common.base.Preconditions;
 import com.google.common.collect.ImmutableSet;
 import com.google.common.collect.Iterables;
 
@@ -61,6 +62,7 @@ public class TermsExtractor {
     if (text == null) {
       return Optional.empty();
     }
+    Preconditions.checkArgument(batchSize > 0, "Batch size is not > 0");
     LOG.debug("Extracting terms for text {} in batches of size {}", text, batchSize);
     List<String> tokens = getTokensFromText(text);
     Map<String, Integer> termOccurrenceMap = new HashMap<>();
