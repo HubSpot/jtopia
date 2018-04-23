@@ -13,11 +13,12 @@ import java.util.function.Consumer;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import com.google.common.base.CharMatcher;
 import com.google.common.base.Preconditions;
+import com.google.common.base.Splitter;
 import com.google.common.collect.ImmutableSet;
 import com.google.common.collect.Iterables;
 
-import de.moritzf.nlp.jtopia.cleaner.TextCleaner;
 import de.moritzf.nlp.jtopia.entities.ConfigurationIF;
 import de.moritzf.nlp.jtopia.entities.TaggedTerm;
 import de.moritzf.nlp.jtopia.entities.TaggedTermIF;
@@ -29,9 +30,10 @@ import edu.stanford.nlp.tagger.maxent.MaxentTagger;
 public class TermsExtractor {
 
   private static final Logger LOG = LoggerFactory.getLogger(TermsExtractor.class);
+  private static final Splitter TOKENIZER = Splitter.on(" ").omitEmptyStrings().trimResults(CharMatcher.anyOf(" \"':;,.{}()[]\\/!_-?"));
+
   private final MaxentTagger tagger;
   private final TermsFilter termsFilter;
-  private final TextCleaner textCleaner;
 
   public TermsExtractor(ConfigurationIF configuration) {
 
@@ -39,7 +41,6 @@ public class TermsExtractor {
     this.termsFilter = new TermsFilter(configuration.getSingleWordMinOccurrence(),
                                        configuration.getMultiWordMinStrength(),
                                        configuration.getStopWords());
-    this.textCleaner = new TextCleaner();
   }
 
   public Set<TaggedTerm> generateTaggedTerms(Collection<String> terms) {
@@ -85,8 +86,7 @@ public class TermsExtractor {
   }
 
   private List<String> getTokensFromText(String text) {
-    String normalizedText = textCleaner.normalizeText(text);
-    return textCleaner.tokenizeText(normalizedText);
+    return TOKENIZER.splitToList(text.replaceAll("\\n", " . "));
   }
 
   private Map<String, Integer> generateTermsAndTheirOccurrenceMap(List<String> tokens) {
