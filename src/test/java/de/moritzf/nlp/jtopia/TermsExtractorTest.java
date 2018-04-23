@@ -34,8 +34,8 @@ public class TermsExtractorTest {
     TermsExtractor termsExtractor = new TermsExtractor(configuration);
     String englishText = Resources.toString(getClass().getResource("/english-text.txt"), StandardCharsets.UTF_8);
     Set<String> expectedKeyphrases = new HashSet<>(Arrays.asList("oil lemon juice", "abrasive agents", "websites offer", "non-scratch sponge", "ClearShield simple spray-on",
-                                                                 "specific recommendations", "standard check manufacturer", "care instructions company",
-                                                                 "soap scum", "Mirror Inc", "mineral deposits", "research hardness", "cleaning time", "stone /tile",
+                                                                 "specific recommendations", "standard check manufacturers website", "care instructions company",
+                                                                 "soap scum", "Mirror Inc", "mineral deposits", "research hardness", "cleaning time",
                                                                  "brushed-on product", "basic level", "water spots", "baking soda liquid", "life prevention key",
                                                                  "cause damage", "reminder use", "Arrow Glass", "efforts need", "customers Central Texas", "others mixture"));
 
@@ -49,12 +49,12 @@ public class TermsExtractorTest {
     Configuration configuration = configurationManager.getConfigurationFor(ConfigurationManager.ENGLISH);
     TermsExtractor termsExtractor = new TermsExtractor(configuration);
     String englishText = Resources.toString(getClass().getResource("/english-text.txt"), StandardCharsets.UTF_8);
-    Set<String> expectedKeyphrases = new HashSet<>(Arrays.asList("non-scratch sponge", "Mirror Inc", "stone /tile", "cleaning time", "water spots", "baking soda liquid",
-                                                                 "soap scum mineral deposits", "others mixture", "websites offer", "abrasive agents", "cleaning guidelines",
-                                                                 "care instructions company", "dish soap", "soap scum", "tips Let", "research hardness", "mineral deposits",
+    Set<String> expectedKeyphrases = new HashSet<>(Arrays.asList("non-scratch sponge", "Mirror Inc", "cleaning time", "water spots", "liquid soap",
+                                                                 "others mixture", "websites offer", "abrasive agents", "cleaning guidelines", "check door manufacturers website",
+                                                                 "care instructions", "dish soap", "soap scum", "tips Let", "mineral deposits", "vinegar water",
                                                                  "Central Texas", "basic level", "brushed-on product", "ClearShield simple spray-on solution",
-                                                                 "ShowerGuard glass", "life prevention key", "damage surface", "cause damage", "door glass",
-                                                                 "cleaning product recommendations", "Arrow Glass", "door manufacturer", "lemon juice"));
+                                                                 "ShowerGuard glass", "life prevention key", "cause damage", "ShowerGuard Diamon-Fusion",
+                                                                 "specific cleaning product recommendations", "Arrow Glass", "oil lemon juice"));
 
     Optional<TermResponse> termDocument = termsExtractor.extractTermsByWordBatchSize(englishText, 100);
     assertThat(termDocument).isPresent();
@@ -66,7 +66,7 @@ public class TermsExtractorTest {
     Configuration configuration = configurationManager.getConfigurationFor(ConfigurationManager.ENGLISH, ConfigurationManager.ENGLISH_WSJ_LEFT3WORDS_NODISTSIM_TAGGER);
     TermsExtractor termsExtractor = new TermsExtractor(configuration);
     String englishText = Resources.toString(getClass().getResource("/english-text.txt"), StandardCharsets.UTF_8);
-    Set<String> expectedKeyphrases = new HashSet<>(Arrays.asList("oil lemon juice", "websites offer", "standard check manufacturer", "care instructions company",
+    Set<String> expectedKeyphrases = new HashSet<>(Arrays.asList("oil lemon juice", "websites offer", "standard check manufacturers website", "care instructions company",
                                                                  "soap scum", "Mirror Inc", "mineral deposits", "research hardness", "cleaning time", "brushed-on product",
                                                                  "water spots", "soda liquid", "life prevention key", "cause damage", "reminder use", "Arrow Glass",
                                                                  "efforts need", "customers Central Texas", "others mixture"));
@@ -84,7 +84,7 @@ public class TermsExtractorTest {
                                                                            ConfigurationManager.ENGLISH_WSJ_LEFT3WORDS_NODISTSIM_TAGGER);
     TermsExtractor termsExtractor = new TermsExtractor(configuration);
     String englishText = Resources.toString(getClass().getResource("/english-text.txt"), StandardCharsets.UTF_8);
-    Set<String> expectedKeyphrases = new HashSet<>(Arrays.asList("oil lemon juice", "life prevention key", "standard check manufacturer", "care instructions company", "customers Central Texas"));
+    Set<String> expectedKeyphrases = new HashSet<>(Arrays.asList("oil lemon juice", "life prevention key", "standard check manufacturers website", "care instructions company", "customers Central Texas"));
 
     Optional<TermResponse> termDocument = termsExtractor.extractTerms(englishText);
     assertThat(termDocument).isPresent();
@@ -97,7 +97,7 @@ public class TermsExtractorTest {
     Configuration configuration = configurationManager.getConfigurationFor(ConfigurationManager.SPANISH);
     TermsExtractor termsExtractor = new TermsExtractor(configuration);
     String spanishText = Resources.toString(getClass().getResource("/spanish-text.txt"), StandardCharsets.UTF_8);
-    Set<String> expectedKeyphrases = ImmutableSet.of("accesorio cabeza", "colocarte una camisa", "mallas tipo nylon polipropileno", "un abrigo", "desempe ño", "tu deporte");
+    Set<String> expectedKeyphrases = ImmutableSet.of("accesorio cabeza", "colocarte una camisa", "mallas tipo nylon polipropileno", "un abrigo", "gorra pañoleta", "tu deporte");
 
     Optional<TermResponse> termDocument = termsExtractor.extractTerms(spanishText);
     assertThat(termDocument).isPresent();
